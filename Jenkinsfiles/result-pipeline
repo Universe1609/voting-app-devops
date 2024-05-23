@@ -79,7 +79,7 @@ pipeline{
         stage("Docker image scanning con Trivy") {
             steps {
                 dir('Application-code/result'){
-                    sh 'trivy image -f table ${DOCKERFILE_NAME} > trivyimage-scanning-${APP}-${BUILD_NUMBER}-${BUILD_ID}.txt'
+                    sh 'trivy image -f table ${DOCKERFILE_NAME}:${BUILD_NUMBER} > trivyimage-scanning-${APP}-${BUILD_NUMBER}-${BUILD_ID}.txt'
                 }
             }
         }
