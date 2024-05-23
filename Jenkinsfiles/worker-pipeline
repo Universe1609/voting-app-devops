@@ -6,7 +6,7 @@ pipeline{
     }
 
     environment {
-        SCANNER_HOME=tool 'sonar-scanner'
+        SCANNER_HOME=tool 'sonar-scanner-for-msbuild'
         DOCKERFILE_NAME='worker-app'
         TERRAFORM_CONDITION='false'
         ENVIRONMENT='prod' // or prod
