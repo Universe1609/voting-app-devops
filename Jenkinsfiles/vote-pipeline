@@ -114,7 +114,7 @@ pipeline{
                     subject: "'${currentBuild.result}'",
                     body: "Project: ${env.JOB_NAME}" + "Build Number: ${BUILD_NUMBER}" + "URL: ${BUILD_URL} ",
                     to: "cloudgroupuni@gmail.com",
-                    attachmentsPattern: 'Application-code/result/trivyimage-scanning-*.txt, Application-code/result/trivyfs-scanning-*.txt, Application-code/result/dependency-check-report.xml'
+                    attachmentsPattern: 'Application-code/vote/trivyimage-scanning-*.txt, Application-code/vote/trivyfs-scanning-*.txt, Application-code/vote/dependency-check-report.xml'
             }
         }
     }
