@@ -1,0 +1,214 @@
+---
+- name: Playbook de configuracion
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Actualizando paquetes
+      apt:
+        update_cache: yes
+        upgrade: "yes"
+        force_apt_get: yes
+      when: ansible_facts.packages is defined
+
+    - name: Openjdk 17
+      apt:
+        name:
+          - openjdk-17-jre
+          - openjdk-17-jdk
+        state: present
+
+    - name: Jenkins
+      block:
+        - name: Añadiendo clave GPG de Jenkins
+          apt_key:
+            url: https://pkg.jenkins.io/debian/jenkins.io-2023.key
+            state: present
+
+        - name: Verificar si el repo ya existe
+          command: apt-cache policy | grep jenkins
+          register: jenkins_repo
+          ignore_errors: yes
+
+        - name: Añadiendo repo
+          apt_repository:
+            repo: deb [signed-by=/usr/share/keyrings/jenkins-keyring.gpg] https://pkg.jenkins.io/debian binary/
+            state: present
+          when: "'jenkins' not in jenkins_repo.stdout"
+
+        - name: Instalando Jenkins
+          apt:
+            name: jenkins
+            state: present
+            update_cache: yes
+          when: ansible_facts.packages['jenkins'] is not defined
+
+    - name: Docker
+      block:
+        - name: Instalando Docker
+          apt:
+            name: docker.io
+            state: present
+          when: ansible_facts.packages['docker.io'] is not defined
+
+        - name: Añadiendo jenkins y sudo user al grupo
+          user:
+            name: "{{ item }}"
+            groups: docker
+            append: yes
+          loop:
+            - jenkins
+            - ubuntu
+          when: "ansible_facts.packages['docker.io'] is defined and ansible_facts.packages['jenkins'] is defined"
+
+        - name: Reiniciar docker para aplicar los cambios
+          systemd:
+            name: docker
+            state: restarted
+          when: "ansible_facts.packages['docker.io'] is defined and ansible_facts.packages['jenkins'] is defined"
+
+        - name: Cambiar permisos del sock
+          file:
+            path: /var/run/docker.sock
+            mode: "0777"
+          when: ansible_facts.packages['docker.io'] is defined
+
+    - name: Revantar contenedor sonarqube
+      docker_container:
+        name: sonar
+        image: sonarqube:lts-community
+        state: started
+        published_ports:
+          - "9000:9000"
+        restart_policy: unless-stopped
+
+    - name: Instalando CLI de AWS
+      block:
+        - name: Verificar si AWS CLI ya está instalado
+          command: aws --version
+          register: aws_cli_installed
+          ignore_errors: yes
+
+        - name: Descargar AWS CLI si no está instalado
+          get_url:
+            url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+            dest: /tmp/awscliv2.zip
+          when: aws_cli_installed.failed
+
+        - name: Unzip si no está
+          apt:
+            name: unzip
+            state: present
+          when: aws_cli_installed.failed
+
+        - name: Descomprimir AWS CLI
+          unarchive:
+            src: /tmp/awscliv2.zip
+            dest: /tmp
+            remote_src: yes
+          when: aws_cli_installed.failed
+
+        - name: Instalar AWS CLI
+          command: sudo /tmp/aws/install
+          when: aws_cli_installed.failed
+
+        - name: Actualizar AWS CLI si ya está instalado
+          command: sudo /tmp/aws/install --update
+          when: not aws_cli_installed.failed
+
+    - name: Instalando prerequisitos de Terraform
+      apt:
+        name:
+          - gnupg
+          - software-properties-common
+        state: present
+        update_cache: yes
+
+    - name: Download and add HashiCorp GPG key
+      shell: |
+        wget -O- https://apt.releases.hashicorp.com/gpg | \
+        gpg --dearmor | \
+        sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
+      args:
+        executable: /bin/bash
+
+    - name: Verify the HashiCorp GPG key fingerprint
+      command: gpg --no-default-keyring --keyring /usr/share/keyrings/hashicorp-archive-keyring.gpg --fingerprint
+      register: gpg_fingerprint
+      changed_when: false
+      ignore_errors: yes
+
+    - name: Debug HashiCorp GPG key fingerprint
+      debug:
+        msg: "{{ gpg_fingerprint.stdout }}"
+
+    - name: Add HashiCorp APT repository
+      apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main"
+        state: present
+        update_cache: yes
+
+    - name: Install Terraform
+      apt:
+        name: terraform
+        state: present
+        update_cache: yes
+
+    - name: Install prerequisites for Trivy
+      apt:
+        name:
+          - wget
+          - apt-transport-https
+          - gnupg
+          - lsb-release
+        state: present
+        update_cache: yes
+
+    - name: Add Trivy GPG key
+      shell: |
+        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+      args:
+        executable: /bin/bash
+
+    - name: Add Trivy APT repository
+      shell: |
+        echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+      args:
+        executable: /bin/bash
+
+    - name: Update apt cache for Trivy
+      apt:
+        update_cache: yes
+
+    - name: Install Trivy
+      apt:
+        name: trivy
+        state: present
+        update_cache: yes
+
+    - name: Helm
+      snap:
+        name: helm
+        classic: yes
+
+    - name: Install Nginx and Certbot
+      apt:
+        name:
+          - nginx
+          - certbot
+          - python3-certbot-nginx
+        state: present
+
+    - name: Start and enable Nginx
+      systemd:
+        name: nginx
+        enabled: yes
+        state: started
+
+    - name: Jenkins Password
+      command: cat /var/lib/jenkins/secrets/initialAdminPassword
+      register: jenkins_password
+      changed_when: false
+
+    - name: Imprimiendo jenkins password
+      debug:
+        msg: "Jenkins initial password is: {{ jenkins_password.stdout }}"

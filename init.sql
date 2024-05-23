@@ -1,0 +1,5 @@
+-- init.sql
+CREATE TABLE IF NOT EXISTS votes (
+    id SERIAL PRIMARY KEY,
+    vote VARCHAR(255) NOT NULL
+);

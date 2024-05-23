@@ -1,0 +1,69 @@
+upstream jenkins{
+    server 127.0.0.1:8080;
+}
+
+server{
+    server_name jenkins.devopsuniverse.cloud;
+
+    access_log  /var/log/nginx/jenkins.access.log;
+    error_log   /var/log/nginx/jenkins.error.log;
+
+    proxy_buffers 16 64k;
+    proxy_buffer_size 128k;
+
+    location / {
+        proxy_pass  http://jenkins;
+        proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
+        proxy_redirect off;
+
+        proxy_set_header    Host            $host;
+        proxy_set_header    X-Real-IP       $remote_addr;
+        proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header    X-Forwarded-Proto https;
+    }
+   
+    location /github-webhook {
+        proxy_pass http://jenkins/github-webhook;
+        limit_except POST {
+        deny all;
+        }
+
+        proxy_connect_timeout 150;
+        proxy_send_timeout 100;
+        proxy_read_timeout 100;
+        client_max_body_size 8m;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/jenkins.devopsuniverse.cloud/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/jenkins.devopsuniverse.cloud/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+
+
+server{
+    listen      80;
+    server_name jenkins.devopsuniverse.cloud;
+    return 301 https://jenkins.devopsuniverse.cloud$request_uri; # HTTP to HTTPS redirection
+}
+
+#TO USE THIS CONFIG, U HAVE TO CHANGE JENKINS PORT TO 8081
+#server {
+#    listen 8080 ssl;
+#    server_name jenkins.devopsuniverse.cloud;
+
+#    ssl_certificate /etc/letsencrypt/live/jenkins.devopsuniverse.cloud/fullchain.pem; # Your SSL certificate
+#    ssl_certificate_key /etc/letsencrypt/live/jenkins.devopsuniverse.cloud/privkey.pem; # Your SSL key
+#    include /etc/letsencrypt/options-ssl-nginx.conf; # SSL configuration from Certbot
+#    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # DH parameters
+
+    # Redirect all traffic to HTTPS without the port number
+#    return 301 https://jenkins.devopsuniverse.cloud$request_uri;
+#}

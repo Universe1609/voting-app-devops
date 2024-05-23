@@ -1,0 +1,45 @@
+upstream sonarqube{
+    server 127.0.0.1:9000;
+}
+
+server{
+    server_name sonarqube.devopsuniverse.cloud;
+
+    access_log  /var/log/nginx/sonarqube.access.log;
+    error_log   /var/log/nginx/sonarqube.error.log;
+
+    proxy_buffers 16 64k;
+    proxy_buffer_size 128k;
+
+    location / {
+        proxy_pass  http://sonarqube;
+        proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
+        proxy_redirect off;
+
+        proxy_set_header    Host            $host;
+        proxy_set_header    X-Real-IP       $remote_addr;
+        proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header    X-Forwarded-Proto https;
+    }
+
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/sonarqube.devopsuniverse.cloud/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/sonarqube.devopsuniverse.cloud/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+
+server{
+    if ($host = sonarqube.devopsuniverse.cloud) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen      80;
+    server_name sonarqube.devopsuniverse.cloud;
+    return 404; # managed by Certbot
+
+
+}
