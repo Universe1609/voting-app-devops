@@ -29,7 +29,7 @@ pipeline{
             steps {
                 dir('Application-code/worker'){
                     withSonarQubeEnv('sonar-server') {
-                        sh '''$SCANNER_HOME/bin/sonar-scanner \
+                        sh '''$SCANNER_HOME/sonar-scanner-4.8.1.3023/bin/sonar-scanner \
                         -Dsonar.projectName=${APP} \
                         -Dsonar.projectKey=${APP}'''
                     }
