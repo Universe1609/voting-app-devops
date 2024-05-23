@@ -29,11 +29,11 @@ pipeline{
             steps {
                 dir('Application-code/worker'){
                     withSonarQubeEnv('sonar-server') {
-                        sh '''dotnet $SCANNER_HOME/SonarScanner.MSBuild.dll begin\
-                        /n:${APP} \
-                        /k:${APP} \
-                        dotnet build --no-incremental \
-                        dotnet $SCANNER_HOME/SonarScanner.MSBuild.dll end'''
+                        sh '''
+                        dotnet $SCANNER_HOME/SonarScanner.MSBuild.dll begin /n:${APP} /k:${APP} 
+                        dotnet build --no-incremental
+                        dotnet $SCANNER_HOME/SonarScanner.MSBuild.dll end
+                        '''
                     }
                 }
             }
