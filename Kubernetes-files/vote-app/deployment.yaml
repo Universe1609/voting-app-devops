@@ -35,5 +35,12 @@ spec:
               value: Dogs
           ports:
             - containerPort: 8080
+          volumeMounts:
+            - mountPath: /app
+              name: voteapp-storage
+      volumes:
+        - name: voteapp-storage
+          persistentVolumeClaim:
+            claimName: voteapp-pvc
       restartPolicy: Always
       imagePullPolicy: Always
