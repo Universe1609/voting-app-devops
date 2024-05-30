@@ -9,6 +9,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: gp2
   hostPath:
     path: /mnt/data/redis
 ---
@@ -23,3 +24,4 @@ spec:
   resources:
     requests:
       storage: 2Gi
+  storageClassName: gp2
