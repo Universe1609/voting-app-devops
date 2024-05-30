@@ -7,5 +7,7 @@ spec:
   selector:
     app: vote-app
   ports:
-    - port: <Port>
-      targetPort: <Target Port>
+    - port: 80
+      targetPort: 80
+      protocol: HTTP
+  type: NodePort

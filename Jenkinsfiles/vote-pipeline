@@ -97,6 +97,15 @@ pipeline{
                 }
             }
         }
+
+        //stage("Deploy App"){
+        //    steps{
+        //        dir("Kubernetes-files/${APP}"){
+        //            sh 'kubectl -n three-tier -f deployment.yml'
+        //            sh 'kubectl -n three-tier -f service.yml'
+        //        }
+        //    }
+        //}
     }
     post{
         always{
