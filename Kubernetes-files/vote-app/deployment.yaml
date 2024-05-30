@@ -22,7 +22,7 @@ spec:
       imagePullSecrets:
         - name: ecr-registry-secret
       containers:
-        - image: 844646036290.dkr.ecr.us-east-2.amazonaws.com/vote-app:19
+        - image: 844646036290.dkr.ecr.us-east-2.amazonaws.com/vote-app:20
           name: vote-app-container
           resources:
             requests:
