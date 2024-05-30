@@ -14,7 +14,7 @@ spec:
   template:
     metadata:
       labels:
-        name: my-name
+        app: vote-app
   selector:
     matchLabels:
       app: vote-app
@@ -22,7 +22,7 @@ spec:
       imagePullSecrets:
         - name: ecr-registry-secret
       containers:
-        - image: 844646036290.dkr.ecr.us-east-2.amazonaws.com/vote-app:15
+        - image: 844646036290.dkr.ecr.us-east-2.amazonaws.com/vote-app:17
           name: vote-app-container
           resources:
             requests:
