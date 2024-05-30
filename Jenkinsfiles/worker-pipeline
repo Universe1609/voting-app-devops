@@ -11,6 +11,10 @@ pipeline{
         TERRAFORM_CONDITION='false'
         ENVIRONMENT='prod' // or prod
         APP='worker-app'
+        AWS_ACCOUNT_ID = credentials('ID_AWS')
+        AWS_ECR_REPO_NAME = "${APP}"
+        AWS_DEFAULT_REGION = 'us-east-2'
+        AWS_ECR_REPO_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/"
     }
     stages{
         stage("Clean WorkSpace"){
@@ -86,28 +90,15 @@ pipeline{
             }
         }
 
-//        stage("Terraform Plan"){
-//            when {
-//                expression {env.TERRAFORM_CONDITION == 'true'}
-//            }
-//            steps {
-//                dir('./Terraform') {
-//                    //sh 'terraform init' backend s3 initialized
-//                    sh 'terraform plan'
-//                }
-//            }
-//        }
-//
-//        stage("Terraform Apply"){
-//            when {
-//                expression {env.TERRAFORM_CONDITION == 'true'}
-//            }
-//            steps{
-//                dir('./Terraform') {
-//                    sh 'terraform apply -auto-approve'
-//                }
-//            }
-//        }
+        stage("Subiendo a ECR"){
+            steps{
+                script{
+                    sh 'aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ECR_REPO_URI}'
+                    sh 'docker tag ${DOCKERFILE_NAME}:${BUILD_NUMBER} ${AWS_ECR_REPO_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}'
+                    sh 'docker push ${AWS_ECR_REPO_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}'
+                }
+            }
+        }
     }
     post{
         always{

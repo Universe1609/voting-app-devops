@@ -97,28 +97,6 @@ pipeline{
                 }
             }
         }
-//        stage("Terraform Plan"){
-//            when {
-//                expression {env.TERRAFORM_CONDITION == 'true'}
-//            }
-//            steps {
-//                dir('./Terraform') {
-//                    //sh 'terraform init' backend s3 initialized
-//                    sh 'terraform plan'
-//                }
-//            }
-//        }
-//
-//        stage("Terraform Apply"){
-//            when {
-//                expression {env.TERRAFORM_CONDITION == 'true'}
-//            }
-//            steps{
-//                dir('./Terraform') {
-//                    sh 'terraform apply -auto-approve'
-//                }
-//            }
-//        }
     }
     post{
         always{
