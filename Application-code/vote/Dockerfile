@@ -48,4 +48,4 @@ COPY . .
 EXPOSE 80
 
 # Run the application.
-CMD gunicorn 'app:app' --bind=0.0.0.0:80
+CMD gunicorn 'app:app' --bind=0.0.0.0:8080

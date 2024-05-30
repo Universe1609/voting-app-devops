@@ -22,7 +22,7 @@ spec:
       imagePullSecrets:
         - name: ecr-registry-secret
       containers:
-        - image: 844646036290.dkr.ecr.us-east-2.amazonaws.com/vote-app:18
+        - image: 844646036290.dkr.ecr.us-east-2.amazonaws.com/vote-app:19
           name: vote-app-container
           resources:
             requests:
@@ -34,6 +34,6 @@ spec:
             - name: OPTION_B
               value: Dogs
           ports:
-            - containerPort: 80
+            - containerPort: 8080
       restartPolicy: Always
       imagePullPolicy: Always
