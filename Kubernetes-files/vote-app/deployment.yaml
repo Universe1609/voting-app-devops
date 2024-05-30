@@ -11,18 +11,18 @@ spec:
     rollingUpdate:
       maxSurge: 1
       maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: vote-app
   template:
     metadata:
       labels:
         app: vote-app
-  selector:
-    matchLabels:
-      app: vote-app
     spec:
       imagePullSecrets:
         - name: ecr-registry-secret
       containers:
-        - image: 844646036290.dkr.ecr.us-east-2.amazonaws.com/vote-app:17
+        - image: 844646036290.dkr.ecr.us-east-2.amazonaws.com/vote-app:18
           name: vote-app-container
           resources:
             requests:
