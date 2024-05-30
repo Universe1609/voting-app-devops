@@ -8,14 +8,14 @@ resource "aws_instance" "jenkins_instance" {
   iam_instance_profile = var.instance_profile
 
   #ansible instead of bash script
-  #user_data = templatefile("./user-data.sh")
+  user_data = templatefile("./modules/EC2/user-data.sh", {})
 
   root_block_device {
     volume_size = 30
     volume_type = "gp2"
   }
   tags = {
-    "name" = "${var.environment}-jenkins"
+    "Name" = "${var.environment}-jenkins"
   }
 }
 

@@ -1,0 +1,11 @@
+Version: v1
+kind: Service
+metadata:
+  name: vote-app
+  namespace: three-tier
+spec:
+  selector:
+    app: vote-app
+  ports:
+    - port: <Port>
+      targetPort: <Target Port>
