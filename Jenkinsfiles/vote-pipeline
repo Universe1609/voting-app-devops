@@ -25,7 +25,8 @@ pipeline{
 
         stage("Checkout Git"){
             steps{
-                git branch: 'main', url: 'https://github.com/Universe1609/voting-app-devops'
+                //git branch: 'main', url: 'https://github.com/Universe1609/voting-app-devops'
+                git branch: 'develop', url: 'https://github.com/Universe1609/voting-app-devops'
             }
         }
 
