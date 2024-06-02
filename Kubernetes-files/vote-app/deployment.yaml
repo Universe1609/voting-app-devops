@@ -22,7 +22,7 @@ spec:
       imagePullSecrets:
         - name: ecr-registry-secret
       containers:
-        - image: 844646036290.dkr.ecr.us-east-2.amazonaws.com/vote-app:28
+        - image: 844646036290.dkr.ecr.us-east-2.amazonaws.com/vote-app:29
           name: vote-app-container
           resources:
             requests:
@@ -35,12 +35,12 @@ spec:
               value: Dogs
           ports:
             - containerPort: 8080
-          #volumeMounts:
-          #  - mountPath: /app
-          #:    name: voteapp-storage
-      #volumes:
-      #  - name: voteapp-storage
-      #    persistentVolumeClaim:
-      #      claimName: voteapp-pvc
+          volumeMounts:
+            - mountPath: /app
+              name: voteapp-storage
+      volumes:
+        - name: voteapp-storage
+          persistentVolumeClaim:
+            claimName: voteapp-pvc
       restartPolicy: Always
       imagePullPolicy: Always
