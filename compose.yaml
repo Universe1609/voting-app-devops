@@ -12,7 +12,7 @@ services:
     build:
       context: ./Application-code/vote
     ports:
-      - "80:80"
+      - "8080:8080"
     environment:
       - OPTION_A=Cats
       - OPTION_B=Dogs

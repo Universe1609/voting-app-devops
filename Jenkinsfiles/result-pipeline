@@ -11,6 +11,10 @@ pipeline{
         TERRAFORM_CONDITION='false'
         ENVIRONMENT='prod' // or prod
         APP='result-app'
+        AWS_ACCOUNT_ID = credentials('ID_AWS')
+        AWS_ECR_REPO_NAME = "${APP}"
+        AWS_DEFAULT_REGION = 'us-east-2'
+        AWS_ECR_REPO_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/"
     }
     stages{
         stage("Clean WorkSpace"){
@@ -21,7 +25,8 @@ pipeline{
 
         stage("Checkout Git"){
             steps{
-                git branch: 'main', url: 'https://github.com/Universe1609/voting-app-devops'
+                //git branch: 'main', url: 'https://github.com/Universe1609/voting-app-devops'
+                git branch: 'develop', url: 'https://github.com/Universe1609/voting-app-devops'
             }
         }
 
@@ -80,6 +85,16 @@ pipeline{
             steps {
                 dir('Application-code/result'){
                     sh 'trivy image -f table ${DOCKERFILE_NAME}:${BUILD_NUMBER} > trivyimage-scanning-${APP}-${BUILD_NUMBER}-${BUILD_ID}.txt'
+                }
+            }
+        }
+
+        stage("Subiendo a ECR"){
+            steps{
+                script{
+                    sh 'aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ECR_REPO_URI}'
+                    sh 'docker tag ${DOCKERFILE_NAME}:${BUILD_NUMBER} ${AWS_ECR_REPO_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}'
+                    sh 'docker push ${AWS_ECR_REPO_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}'
                 }
             }
         }

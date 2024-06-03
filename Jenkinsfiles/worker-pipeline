@@ -6,10 +6,15 @@ pipeline{
     }
 
     environment {
-        SCANNER_HOME=tool 'sonar-scanner'
+        SCANNER_HOME=tool 'sonar-scanner-for-msbuild'
         DOCKERFILE_NAME='worker-app'
         TERRAFORM_CONDITION='false'
-        ENVIRONMENT='dev' // or prod
+        ENVIRONMENT='prod' // or prod
+        APP='worker-app'
+        AWS_ACCOUNT_ID = credentials('ID_AWS')
+        AWS_ECR_REPO_NAME = "${APP}"
+        AWS_DEFAULT_REGION = 'us-east-2'
+        AWS_ECR_REPO_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/"
     }
     stages{
         stage("Clean WorkSpace"){
@@ -20,16 +25,21 @@ pipeline{
 
         stage("Checkout Git"){
             steps{
-                git branch: 'main', url: 'https://github.com/Universe1609/todo-list-devops'
+                //git branch: 'main', url: 'https://github.com/Universe1609/voting-app-devops'
+                git branch: 'develop', url: 'https://github.com/Universe1609/voting-app-devops'
             }
         }
 
         stage("Análisis Sonarqube") {
             steps {
-                withSonarQubeEnv('sonar-server') {
-                    sh '''$SCANNER_HOME/bin/sonar-scanner \
-                    -Dsonar.projectName=todo-list-app \
-                    -Dsonar.projectKey=todo-list-app'''
+                dir('Application-code/worker'){
+                    withSonarQubeEnv('sonar-server') {
+                        sh '''
+                        dotnet $SCANNER_HOME/SonarScanner.MSBuild.dll begin /n:${APP} /k:${APP} 
+                        dotnet build --no-incremental
+                        dotnet $SCANNER_HOME/SonarScanner.MSBuild.dll end
+                        '''
+                    }
                 }
             }
         }
@@ -44,57 +54,52 @@ pipeline{
 
         stage("Escaneo de Dependencias OWASP") {
             steps {
-                dependencyCheck additionalArguments: ''' -o './'
+                dir('Application-code/worker'){
+                    dependencyCheck additionalArguments: ''' -o './'
                                                         -s './'
                                                         -f 'ALL'
                                                         --prettyPrint''', odcInstallation: 'DP-Check'
-                dependencyCheckPublisher pattern: 'dependency-check-report.xml'
+                    dependencyCheckPublisher pattern: 'dependency-check-report.xml'
+                }
             }
         }
 
         stage("Filesystem scanning con Trivy") {
             steps {
-                sh 'trivy fs --scanners vuln,secret,misconfig -f table . > trivyfs-scanning-todo-list-app-${BUILD_NUMBER}-${BUILD_ID}.txt'
+                dir('Application-code/worker'){
+                    sh 'trivy fs --scanners vuln,secret,misconfig -f table . > trivyfs-scanning-${APP}-${BUILD_NUMBER}-${BUILD_ID}.txt'
+                }
             }
         }
 
         stage("Compilacion de la Imagen docker") {
             steps {
-                script {
-                    sh 'docker system prune -f'
-                    sh 'docker build -t ${DOCKERFILE_NAME}:${BUILD_NUMBER} .'
+                dir('Application-code/worker'){
+                    script {
+                        sh 'docker system prune -f'
+                        sh 'docker build -t ${DOCKERFILE_NAME}:${BUILD_NUMBER} .'
+                    }
                 }
             }
         }
 
         stage("Docker image scanning con Trivy") {
             steps {
-                sh 'trivy image -f table ${DOCKERFILE_NAME} > trivyimage-scanning-todo-list-app-${BUILD_NUMBER}-${BUILD_ID}.txt'
+                dir('Application-code/worker'){
+                    sh 'trivy image -f table ${DOCKERFILE_NAME}:${BUILD_NUMBER} > trivyimage-scanning-${APP}-${BUILD_NUMBER}-${BUILD_ID}.txt'
+                }
             }
         }
 
-//        stage("Terraform Plan"){
-//            when {
-//                expression {env.TERRAFORM_CONDITION == 'true'}
-//            }
-//            steps {
-//                dir('./Terraform') {
-//                    //sh 'terraform init' backend s3 initialized
-//                    sh 'terraform plan'
-//                }
-//            }
-//        }
-//
-//        stage("Terraform Apply"){
-//            when {
-//                expression {env.TERRAFORM_CONDITION == 'true'}
-//            }
-//            steps{
-//                dir('./Terraform') {
-//                    sh 'terraform apply -auto-approve'
-//                }
-//            }
-//        }
+        stage("Subiendo a ECR"){
+            steps{
+                script{
+                    sh 'aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ECR_REPO_URI}'
+                    sh 'docker tag ${DOCKERFILE_NAME}:${BUILD_NUMBER} ${AWS_ECR_REPO_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}'
+                    sh 'docker push ${AWS_ECR_REPO_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}'
+                }
+            }
+        }
     }
     post{
         always{
@@ -103,7 +108,7 @@ pipeline{
                     subject: "'${currentBuild.result}'",
                     body: "Project: ${env.JOB_NAME}" + "Build Number: ${BUILD_NUMBER}" + "URL: ${BUILD_URL} ",
                     to: "cloudgroupuni@gmail.com",
-                    attachmentsPattern: 'trivyimage-scanning-todo-list-app-*.txt, trivyfs-scanning-todo-list-app-*.txt, dependency-check-report.xml'
+                    attachmentsPattern: 'Application-code/worker/trivyimage-scanning-*.txt, Application-code/worker/trivyfs-scanning-*.txt, Application-code/worker/dependency-check-report.xml'
             }
         }
     }

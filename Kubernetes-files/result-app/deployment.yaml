@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: result-app
+  namespace: three-tier
+  labels:
+    app: result-app
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: result-app
+  template:
+    metadata:
+      labels:
+        app: result-app
+    spec:
+      imagePullSecrets:
+        - name: ecr-registry-secret
+      containers:
+        - image: 844646036290.dkr.ecr.us-east-2.amazonaws.com/result-app:52
+          name: result-app-container
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "550M"
+          env:
+            - name: POSTGRES_PASSWORD
+              value: postgres
+            - name: NODE_ENV
+              value: production
+          ports:
+            - containerPort: 4000
+          #volumeMounts:
+          #  - mountPath: /app
+          #:    name: voteapp-storage
+      #volumes:
+      #  - name: voteapp-storage
+      #    persistentVolumeClaim:
+      #      claimName: voteapp-pvc
+      restartPolicy: Always
+      imagePullPolicy: Always

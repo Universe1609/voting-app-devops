@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-result-app
+  namespace: three-tier
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    #alb.ingress.kubernetes.io/target-type: ip
+    #alb.ingress.kubernetes.io/backend-protocol: http
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-2:844646036290:certificate/2db73de8-7768-41ac-a32f-c338b9b3bdfe
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+spec:
+  #ingressClassName: alb # this is a application load balancer in AWS
+  rules:
+    - host: result.devopsuniverse.cloud
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: result-app
+                port:
+                  number: 4000

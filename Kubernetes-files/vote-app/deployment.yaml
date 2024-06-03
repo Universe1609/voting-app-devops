@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vote-app
+  namespace: three-tier
+  labels:
+    app: vote-app
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: vote-app
+  template:
+    metadata:
+      labels:
+        app: vote-app
+    spec:
+      imagePullSecrets:
+        - name: ecr-registry-secret
+      containers:
+        - image: 844646036290.dkr.ecr.us-east-2.amazonaws.com/vote-app:30
+          name: vote-app-container
+          resources:
+            requests:
+              cpu: "20m"
+              memory: "55M"
+          env:
+            - name: OPTION_A
+              value: Cats
+            - name: OPTION_B
+              value: Dogs
+          ports:
+            - containerPort: 8080
+          #volumeMounts:
+          #  - mountPath: /app
+          #:    name: voteapp-storage
+      #volumes:
+      #  - name: voteapp-storage
+      #    persistentVolumeClaim:
+      #      claimName: voteapp-pvc
+      restartPolicy: Always
+      imagePullPolicy: Always
