@@ -29,9 +29,9 @@ resource "aws_subnet" "eks-vpc-pub-sub1" {
   cidr_block = cidrsubnet(data.aws_vpc.main.cidr_block, 8, 3)
 
   tags = {
-    Name                                           = "eks-${var.env}-pub-${var.availability_zone_1}-sub1"
-    "kubernetes.io/cluster/eks-${var.env}-cluster" = "shared"
-    "kubernetes.io/role/elb"                       = 1
+    Name                                        = "eks-${var.env}-pub-${var.availability_zone_1}-sub1"
+    "kubernetes.io/cluster/eks-cluster-project" = "shared"
+    "kubernetes.io/role/elb"                    = 1
   }
 
   availability_zone       = var.availability_zone_1
@@ -43,9 +43,9 @@ resource "aws_subnet" "eks-vpc-pub-sub2" {
   cidr_block = cidrsubnet(data.aws_vpc.main.cidr_block, 8, 4)
 
   tags = {
-    Name                                           = "eks-${var.env}-pub-${var.availability_zone_2}-sub2"
-    "kubernetes.io/cluster/eks-${var.env}-cluster" = "shared"
-    "kubernetes.io/role/elb"                       = 1
+    Name                                        = "eks-${var.env}-pub-${var.availability_zone_2}-sub2"
+    "kubernetes.io/cluster/eks-cluster-project" = "shared"
+    "kubernetes.io/role/elb"                    = 1
   }
 
   availability_zone       = var.availability_zone_2
@@ -57,9 +57,9 @@ resource "aws_subnet" "eks-vpc-priv-sub1" {
   cidr_block = cidrsubnet(data.aws_vpc.main.cidr_block, 8, 5)
 
   tags = {
-    Name                                           = "eks-${var.env}-priv-${var.availability_zone_1}-sub1"
-    "kubernetes.io/cluster/eks-${var.env}-cluster" = "shared"
-    "kubernetes.io/role/internal-elb"              = 1
+    Name                                        = "eks-${var.env}-priv-${var.availability_zone_1}-sub1"
+    "kubernetes.io/cluster/eks-cluster-project" = "shared"
+    "kubernetes.io/role/internal-elb"           = 1
   }
 
   availability_zone = var.availability_zone_1
@@ -70,9 +70,9 @@ resource "aws_subnet" "eks-vpc-priv-sub2" {
   cidr_block = cidrsubnet(data.aws_vpc.main.cidr_block, 8, 6)
 
   tags = {
-    Name                                           = "eks-${var.env}-priv-${var.availability_zone_2}-sub2"
-    "kubernetes.io/cluster/eks-${var.env}-cluster" = "shared"
-    "kubernetes.io/role/internal-elb"              = 1
+    Name                                        = "eks-${var.env}-priv-${var.availability_zone_2}-sub2"
+    "kubernetes.io/cluster/eks-cluster-project" = "shared"
+    "kubernetes.io/role/internal-elb"           = 1
   }
 
   availability_zone = var.availability_zone_2
