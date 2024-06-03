@@ -14,7 +14,7 @@ spec:
   ingressClassName: alb # this is a application load balancer in AWS
   rules:
     - host: app.devopsuniverse.cloud
-    - http:
+      http:
         paths:
           - path: /result
             pathType: Prefix
