@@ -11,7 +11,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: gp2
   hostPath:
-    path: /mnt/data/postgredb14-1
+    path: /mnt/data/postgredb14-2
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
