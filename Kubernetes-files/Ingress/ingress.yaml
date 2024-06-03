@@ -14,20 +14,20 @@ metadata:
 spec:
   #ingressClassName: alb # this is a application load balancer in AWS
   rules:
-    - host: app.devopsuniverse.cloud
-      http:
-        paths:
-          - path: /result
-            pathType: Prefix
-            backend:
-              service:
-                name: result-app
-                port:
-                  number: 4000
-          - path: /app
-            pathType: Prefix
-            backend:
-              service:
-                name: vote-app
-                port:
-                  number: 8080
+    #- host: app.devopsuniverse.cloud
+    http:
+      paths:
+        - path: /result
+          pathType: Prefix
+          backend:
+            service:
+              name: result-app
+              port:
+                number: 4000
+        - path: /app
+          pathType: Prefix
+          backend:
+            service:
+              name: vote-app
+              port:
+                number: 8080
