@@ -19,6 +19,7 @@ spec:
       containers:
         - name: db
           image: postgres:15-alpine
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5432
           env:
@@ -26,16 +27,13 @@ spec:
               value: postgres
             - name: POSTGRES_USER
               value: postgres
-              #valueFrom:
-              #  secretKeyRef:
-              #    name: db-credentials
-              #    key: POSTGRES_USER
             - name: POSTGRES_PASSWORD
-              value: postgres
-              #valueFrom:
-              #  secretKeyRef:
-              #    name: db-credentials
-              #    key: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: POSTGRES_PASSWORD
+            #- name: PGDATA
+            #  value: /var/lib/postgresql/data/pgdata
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
               name: db-storage
