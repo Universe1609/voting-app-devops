@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: result-app
+  namespace: three-tier
+spec:
+  selector:
+    app: result-app
+  ports:
+    - port: 4000
+      targetPort: 4000
+      protocol: TCP
+  type: NodePort
