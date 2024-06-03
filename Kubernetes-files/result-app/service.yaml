@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: result-app
   namespace: three-tier
+  annotations:
+  #  alb.ingress.kubernetes.io/healthcheck-path: /result
 spec:
   selector:
     app: result-app
