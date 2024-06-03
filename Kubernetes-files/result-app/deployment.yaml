@@ -22,7 +22,7 @@ spec:
       imagePullSecrets:
         - name: ecr-registry-secret
       containers:
-        - image: 844646036290.dkr.ecr.us-east-2.amazonaws.com/result-app:51
+        - image: 844646036290.dkr.ecr.us-east-2.amazonaws.com/result-app:52
           name: result-app-container
           resources:
             requests:
