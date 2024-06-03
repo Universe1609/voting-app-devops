@@ -13,6 +13,7 @@ metadata:
 spec:
   ingressClassName: alb # this is a application load balancer in AWS
   rules:
+    - host: app.devopsuniverse.cloud
     - http:
         paths:
           - path: /result
