@@ -24,7 +24,7 @@ spec:
                 name: result-app
                 port:
                   number: 4000
-          - path: /
+          - path: /app
             pathType: Prefix
             backend:
               service:
