@@ -7,10 +7,10 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "todo-list-devsecops-project"
+    bucket         = "vote-app-bucket-project"
     key            = "estado/terraform.tfstate"
     region         = "us-east-2"
     encrypt        = true
-    dynamodb_table = "todo-list-devsecops-table"
+    dynamodb_table = "voting-app-table"
   }
 }
