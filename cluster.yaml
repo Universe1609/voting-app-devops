@@ -1,0 +1,52 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: eks-cluster-project
+  region: us-east-2
+
+vpc:
+  #id: vpc-0449e5f1151365c7f
+  subnets:
+    private:
+      us-east-2a: { id: subnet-07465b8ed014b1eb0 }
+      us-east-2b: { id: subnet-0146b741f66fe4c4e }
+    public:
+      us-east-2a: { id: subnet-075bc26114f1c8c25 }
+      us-east-2b: { id: subnet-055b3ccc5b685fabb }
+
+nodeGroups:
+  - name: eks-1-workers
+    labels: { role: workers }
+    instanceType: t2.medium
+    desiredCapacity: 1
+    privateNetworking: true
+  - name: ng-2-builders
+    labels: { role: builders }
+    instanceType: t2.medium
+    desiredCapacity: 1
+    privateNetworking: true
+
+iam:
+  withOIDC: true
+  serviceAccounts:
+    - metadata:
+        name: aws-load-balancer-controller
+        namespace: kube-system
+      wellKnownPolicies:
+        awsLoadBalancerController: true
+    - metadata:
+        name: build-service
+        namespace: ci-cd
+      wellKnownPolicies:
+        imageBuilder: true
+    - metadata:
+        name: ebs-csi-controller-sa
+        namespace: kube-system
+      wellKnownPolicies:
+        ebsCSIController: true
+    - metadata:
+        name: efs-csi-controller-sa
+        namespace: kube-system
+      wellKnownPolicies:
+        efsCSIController: true
