@@ -6,3 +6,4 @@
 #parameters:
 #  type: gp2
 #reclaimPolicy: Retain
+#volumeBindingMode: Immediate
